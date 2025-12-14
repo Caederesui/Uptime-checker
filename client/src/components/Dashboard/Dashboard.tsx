@@ -8,6 +8,7 @@ import { countries, domains } from "../../data/constants.ts";
 import ButtonGroup from "../ButtonGroup/ButtonGroup.tsx";
 import Status from "../Status/Status.tsx";
 import { useDataStatus } from "../../context/DataStatusContext.tsx";
+import ToggleSwitch from "../ToggleSwitch/ToggleSwitch.tsx";
 
 interface Log {
     created_at: string;
@@ -21,6 +22,7 @@ interface Log {
     dns_time?: number;
     tls_time?: number;
     tcp_time?: number;
+    unreliable?: boolean;
 }
 
 interface CityLogs {
@@ -57,6 +59,7 @@ const Dashboard = () => {
         () => localStorage.getItem("aggregationType") || "standard"
     );
     const { domain } = useParams<{ domain: string }>();
+    const [hideUnreliable, setHideUnreliable] = useState(false);
 
     const timeRangeOptions = [
 		{ value: "3hour", label: "3 часа" },
@@ -71,6 +74,7 @@ const Dashboard = () => {
 
     const fetchData = async () => {
         try {
+            let logsData: CountryLogs = {};
             if (domain) {
                 const [logsResponse, locationsResponse] = await Promise.all([
                     fetch(`/http-logs?timeRange=${timeRange}&domain=${domain}`),
@@ -88,10 +92,9 @@ const Dashboard = () => {
                     );
                 }
 
-                const logsData: CountryLogs = await logsResponse.json();
+                logsData = await logsResponse.json();
                 const locationsData: LocationGroups =
                     await locationsResponse.json();
-                setHttpLogs(logsData);
                 setLocationGroups(locationsData);
             } else {
                 const response = await fetch(
@@ -125,6 +128,38 @@ const Dashboard = () => {
                 );
                 setDomainLogs(groupedByDomain);
             }
+
+            if (hideUnreliable) {
+                const filteredLogs: CountryLogs = {};
+                for (const country in logsData) {
+                    filteredLogs[country] = {};
+                    for (const city in logsData[country]) {
+                        const cityLogs = logsData[country][city];
+                        const processedLogs = cityLogs.map((log, i) => {
+                            if ((log.total_time ?? 0) > 5000) {
+                                const prev = cityLogs[i - 1];
+                                const next = cityLogs[i + 1];
+                                if (
+                                    (prev?.total_time ?? 0) < 5000 &&
+                                    (next?.total_time ?? 0) < 5000
+                                ) {
+                                    return {
+                                        ...prev,
+                                        unreliable: true,
+                                    };
+                                }
+                            }
+                            return log;
+                        });
+                        filteredLogs[country][city] = processedLogs.filter(
+                            (log) => (log.total_time ?? 0) < 5000
+                        );
+                    }
+                }
+                setHttpLogs(filteredLogs);
+            } else {
+                setHttpLogs(logsData);
+            }
             setStatus("dashboard", "success");
         } catch (e: any) {
             if (
@@ -139,6 +174,7 @@ const Dashboard = () => {
             setLoading(false);
         }
     };
+    
     useEffect(() => {
         setLoading(true);
         setStatus("dashboard", "loading");
@@ -148,7 +184,7 @@ const Dashboard = () => {
     useEffect(() => {
         setChartLoading(true);
         fetchData().finally(() => setChartLoading(false));
-    }, [timeRange]);
+    }, [timeRange, hideUnreliable]);
 
     useEffect(() => {
         const intervalId = setInterval(fetchData, 30000);
@@ -169,6 +205,7 @@ const Dashboard = () => {
             );
         };
     }, [domain, timeRange]);
+    
     useEffect(() => {
         if (timeRange === "week") {
             setAggregationType("hour");
@@ -196,6 +233,11 @@ const Dashboard = () => {
                             options={aggregationTypeOptions}
                             value={aggregationType}
                             onChange={setAggregationType}
+                        />
+                         <ToggleSwitch
+                            label="Скрывать недостоверные данные"
+                            checked={hideUnreliable}
+                            onChange={setHideUnreliable}
                         />
                     </div>
                 </div>
@@ -260,6 +302,11 @@ const Dashboard = () => {
                         options={aggregationTypeOptions}
                         value={aggregationType}
                         onChange={setAggregationType}
+                    />
+                    <ToggleSwitch
+                        label="Скрывать недостоверные данные"
+                        checked={hideUnreliable}
+                        onChange={setHideUnreliable}
                     />
                 </div>
             </div>

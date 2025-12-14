@@ -41,6 +41,7 @@ interface Log {
     dns_time?: number;
     tls_time?: number;
     tcp_time?: number;
+    unreliable?: boolean;
 }
 
 interface CityLogs {
@@ -109,6 +110,7 @@ const CountryChart = ({
         tls_time: number | undefined;
         first_byte_time: number | undefined;
         download_time: number | undefined;
+        unreliable: boolean | undefined;
     };
 
     const chartRef = useRef<ChartJS<"line", ChartData[]>>(null);
@@ -180,6 +182,7 @@ const CountryChart = ({
                 tls_time: representativeLog.tls_time,
                 first_byte_time: representativeLog.first_byte_time,
                 download_time: representativeLog.download_time,
+                unreliable: representativeLog.unreliable,
             };
         });
 
@@ -189,7 +192,14 @@ const CountryChart = ({
             borderColor: color,
             backgroundColor: `${color}33`,
             pointBackgroundColor: color,
-            pointRadius: 0,
+            pointRadius: (context: any) => {
+                const log = context.raw;
+                return log.unreliable ? 5 : 0;
+            },
+            pointBorderColor: (context: any) => {
+                const log = context.raw;
+                return log.unreliable ? "red" : color;
+            },
             pointHoverRadius: 7,
             pointHitRadius: 20,
             tension: 0.2,
@@ -439,6 +449,9 @@ const CountryChart = ({
                                         ? context.parsed.y.toFixed(0)
                                         : "N/A"
                                 }мс`,
+                                ...(log.unreliable
+                                    ? ["Недостоверный запрос"]
+                                    : []),
                                 `Статус: ${log.status_code}`,
                                 `DNS: ${log.dns_time}мс`,
                                 `TCP: ${log.tcp_time}мс`,
@@ -498,11 +511,10 @@ const CountryChart = ({
                         },
                     },
                     grid: {
-                        display: false,
+                        color: "rgba(255, 255, 255, 0.1)",
                     },
                     ticks: {
                         color: "#d4d4d4",
-                        source: "auto" as const,
                         maxTicksLimit: currentTimeSettings.maxTicksLimit,
                     },
                 },
@@ -513,8 +525,14 @@ const CountryChart = ({
     return (
         <Line
             ref={chartRef}
-            options={getOptions(timeRange, width)}
+            options={getOptions(
+                aggregationType === "hour" && timeRange !== "week"
+                    ? "hour"
+                    : timeRange,
+                width
+            )}
             data={chartData}
+            className={styles.chart}
         />
     );
 };
