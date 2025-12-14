@@ -41,7 +41,7 @@ interface LocationGroups {
 }
 
 const Dashboard = () => {
-    const allowedCountries = ["RU", "UA", "KZ", "BY"];
+    const allowedCountries = ["RU", "UA", "BY"];
     const [httpLogs, setHttpLogs] = useState<CountryLogs>({});
     const [locationGroups, setLocationGroups] = useState<LocationGroups>({});
     const [domainLogs, setDomainLogs] = useState<{
@@ -59,10 +59,9 @@ const Dashboard = () => {
     const { domain } = useParams<{ domain: string }>();
 
     const timeRangeOptions = [
-        { value: "month", label: "Месяц" },
-        { value: "week", label: "Неделя" },
-        { value: "day", label: "День" },
-        { value: "hour", label: "Час" },
+		{ value: "week", label: "Неделя" },
+		{ value: "day", label: "День" },
+        { value: "3hour", label: "3 часа" },
     ];
 
     const aggregationTypeOptions = [
@@ -171,7 +170,7 @@ const Dashboard = () => {
         };
     }, [domain, timeRange]);
     useEffect(() => {
-        if (timeRange === "week" || timeRange === "month") {
+        if (timeRange === "week") {
             setAggregationType("hour");
         } else {
             setAggregationType("standard");

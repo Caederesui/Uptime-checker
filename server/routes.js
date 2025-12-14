@@ -9,20 +9,14 @@ router.get("/http-logs", async (req, res) => {
         const { timeRange, domain } = req.query;
         let interval;
         switch (timeRange) {
-            case "month":
-                interval = "1 month";
-                break;
             case "week":
                 interval = "7 day";
                 break;
             case "day":
                 interval = "1 day";
                 break;
-            case "4hours":
-                interval = "4 hour";
-                break;
-            case "hour":
-                interval = "1 hour";
+            case "3hour":
+                interval = "3 hour";
                 break;
             case "30minutes":
                 interval = "30 minute";
