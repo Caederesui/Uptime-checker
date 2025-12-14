@@ -51,10 +51,10 @@ const Dashboard = () => {
     const [isChartLoading, setChartLoading] = useState(false);
     const { setStatus } = useDataStatus();
     const [timeRange, setTimeRange] = useState(
-        () => localStorage.getItem("timeRange") || "week"
+        () => localStorage.getItem("timeRange") || "3hour"
     );
     const [aggregationType, setAggregationType] = useState(
-        () => localStorage.getItem("aggregationType") || "hour"
+        () => localStorage.getItem("aggregationType") || "standard"
     );
     const { domain } = useParams<{ domain: string }>();
 
