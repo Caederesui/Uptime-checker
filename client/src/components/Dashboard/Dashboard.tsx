@@ -59,9 +59,9 @@ const Dashboard = () => {
     const { domain } = useParams<{ domain: string }>();
 
     const timeRangeOptions = [
-		{ value: "week", label: "Неделя" },
+		{ value: "3hour", label: "3 часа" },
 		{ value: "day", label: "День" },
-        { value: "3hour", label: "3 часа" },
+		{ value: "week", label: "Неделя" },
     ];
 
     const aggregationTypeOptions = [
