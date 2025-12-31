@@ -176,7 +176,7 @@ const checkAndSaveDomain = async (domain, locations) => {
         // Step 2 & 3: Poll for the measurement result until it's finished
         let resultData;
         const startTime = Date.now();
-        const timeout = 30000; // 30 seconds timeout
+        const timeout = 60000; // 60 seconds timeout
 
         while (Date.now() - startTime < timeout) {
             const getResultResponse = await fetch(
