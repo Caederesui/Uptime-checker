@@ -185,10 +185,6 @@ const Dashboard = () => {
                                 (prev?.total_time ?? 0) < 5000 &&
                                 (next?.total_time ?? 0) < 5000
                             ) {
-                                return {
-                                    ...prev,
-                                    unreliable: true,
-                                };
                             }
                         }
                         return log;
