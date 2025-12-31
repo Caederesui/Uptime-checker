@@ -123,10 +123,9 @@ const DomainStatus: React.FC<DomainStatusProps> = ({ domain, logs }) => {
                                                     :{" "}
                                                     {r.status_code !== null
                                                         ? `Статус: ${r.status_code}`
-                                                        : "Неизвестный статус"}
-                                                    ;{" "}
+                                                        : "неизвестный статус"}
                                                     {r.total_time !== null
-                                                        ? `Время: ${r.total_time}ms`
+                                                        ? `; Время: ${r.total_time}ms`
                                                         : ""}
                                                 </div>
                                             ))}
