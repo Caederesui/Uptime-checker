@@ -133,25 +133,51 @@ const CountryChart = ({
     }, []);
 
     const datasets = cities.map((city) => {
-        const rawLogs = cityLogs[city] || [];
+        const logs = cityLogs[city] || [];
         const color = cityColors[city] || "#c9cbcf";
+        const groupedLogs = logs.reduce(
+            (acc: { [key: number]: Log[] }, log: Log) => {
+                const date = new Date(log.created_at);
+                let key;
 
-        const logs = [...rawLogs].sort(
-            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                date.setSeconds(0, 0);
+                key = date.getTime();
+
+                if (!acc[key]) {
+                    acc[key] = [];
+                }
+                acc[key].push(log);
+                return acc;
+            },
+            {} as { [key: number]: Log[] }
         );
 
-        const data = logs.map((log: Log) => ({
-            x: new Date(log.created_at).getTime(),
-            y: log.total_time ?? null,
-            packet_loss: log.packet_loss,
-            status_code: log.status_code,
-            dns_time: log.dns_time,
-            tcp_time: log.tcp_time,
-            tls_time: log.tls_time,
-            first_byte_time: log.first_byte_time,
-            download_time: log.download_time,
-            unreliable: log.unreliable,
-        }));
+        const data = Object.entries(groupedLogs).map(([key, group]) => {
+            const avgValue =
+                group.reduce(
+                    (sum: number, log: Log) => sum + (log.total_time || 0),
+                    0
+                ) / group.length;
+            const avgPacketLoss =
+                group.reduce(
+                    (sum: number, log: Log) => sum + (log.packet_loss || 0),
+                    0
+                ) / group.length;
+            const representativeLog = group[0];
+
+            return {
+                x: parseInt(key),
+                y: isNaN(avgValue) ? null : avgValue,
+                packet_loss: avgPacketLoss,
+                status_code: representativeLog.status_code,
+                dns_time: representativeLog.dns_time,
+                tcp_time: representativeLog.tcp_time,
+                tls_time: representativeLog.tls_time,
+                first_byte_time: representativeLog.first_byte_time,
+                download_time: representativeLog.download_time,
+                unreliable: representativeLog.unreliable,
+            };
+        });
 
         return {
             label: cityTranslations[city] || city,
@@ -161,11 +187,11 @@ const CountryChart = ({
             pointBackgroundColor: color,
             pointRadius: (context: any) => {
                 const log = context.raw;
-                return log && log.unreliable ? 5 : 0;
+                return log.unreliable ? 5 : 0;
             },
             pointBorderColor: (context: any) => {
                 const log = context.raw;
-                return log && log.unreliable ? "red" : color;
+                return log.unreliable ? "red" : color;
             },
             pointHoverRadius: 7,
             pointHitRadius: 20,
@@ -174,10 +200,26 @@ const CountryChart = ({
             spanGaps: false,
         };
     });
+    const sortedDatasets = [...datasets].sort((a, b) => {
+        const aData = a.data
+            .map((d) => d.y)
+            .filter((v): v is number => v !== null);
+        const bData = b.data
+            .map((d) => d.y)
+            .filter((v): v is number => v !== null);
+        const aAvg =
+            aData.length > 0
+                ? aData.reduce((acc, val) => acc + val, 0) / aData.length
+                : 0;
+        const bAvg =
+            bData.length > 0
+                ? bData.reduce((acc, val) => acc + val, 0) / bData.length
+                : 0;
+        return bAvg - aAvg;
+    });
 
-    // Клиентская сортировка удалена
     const chartData = {
-        datasets: datasets,
+        datasets: sortedDatasets,
     };
 
     const getOptions = (timeRange: string, width: number) => {
@@ -189,14 +231,6 @@ const CountryChart = ({
                 maxTicksLimit: number;
             };
         } = {
-            month: {
-                unit: "day",
-                stepSize: 7,
-                displayFormats: {
-                    day: "dd.MM",
-                },
-                maxTicksLimit: 8,
-            },
             week: {
                 unit: "day",
                 displayFormats: {
@@ -212,9 +246,9 @@ const CountryChart = ({
                 },
                 maxTicksLimit: 6,
             },
-            "3hour": {
+            hour: {
                 unit: "minute",
-                stepSize: 30,
+                stepSize: 10,
                 displayFormats: {
                     minute: "HH:mm",
                 },
@@ -222,7 +256,11 @@ const CountryChart = ({
             },
         };
 
-        const currentTimeSettings = timeSettings[timeRange] || timeSettings.day;
+        const currentTimeSettings = timeSettings[timeRange] || {
+            unit: "hour",
+            displayFormats: { hour: "HH:mm" },
+            maxTicksLimit: 6,
+        };
 
         return {
             responsive: true,

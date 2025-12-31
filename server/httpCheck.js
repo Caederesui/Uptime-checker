@@ -164,6 +164,7 @@ const checkAndSaveDomain = async (domain, locations) => {
                         null,
                         null,
                         null,
+                        null,
                     ]);
                 }
             }
@@ -264,6 +265,7 @@ const checkAndSaveDomain = async (domain, locations) => {
                     null,
                     null,
                     null,
+                    null,
                 ];
             }
 
@@ -294,6 +296,7 @@ const checkAndSaveDomain = async (domain, locations) => {
                 target,
                 location.country,
                 location.city,
+                null,
                 null,
                 null,
                 null,
