@@ -70,12 +70,10 @@ const Dashboard = () => {
         { value: "month", label: "Месяц" },
     ];
 
-    // Обрезает логи, чтобы все города/страны начинались и заканчивались одновременно.
     const trimCityLogsByTimeRange = (cityLogsMap: CityLogs) => {
         let minTime = Infinity;
         let maxTime = -Infinity;
 
-        // 1. Найти общий минимальный и максимальный CreatedAt среди всех городов
         for (const city in cityLogsMap) {
             const logs = cityLogsMap[city];
             if (logs.length > 0) {
@@ -91,7 +89,6 @@ const Dashboard = () => {
             return cityLogsMap;
         }
 
-        // 2. Обрезать все логи по общему диапазону
         const trimmedLogs: CityLogs = {};
         for (const city in cityLogsMap) {
             trimmedLogs[city] = cityLogsMap[city].filter((log) => {
@@ -126,7 +123,6 @@ const Dashboard = () => {
                 }
 
                 logsData = await logsResponse.json();
-                // Обрезка для детальной страницы (нужно обрезать все города внутри каждой страны)
                 const processedLogsData: CountryLogs = {};
                 for (const countryKey in logsData) {
                     processedLogsData[countryKey] = trimCityLogsByTimeRange(logsData[countryKey]);
@@ -167,7 +163,6 @@ const Dashboard = () => {
                     {} as { [domain: string]: CityLogs }
                 );
 
-                // Применяем обрезку к каждому домену
                 for (const domainKey in rawGroupedByDomain) {
                     const logsForDomain = rawGroupedByDomain[domainKey];
                     domainLogsData[domainKey] = trimCityLogsByTimeRange(logsForDomain);
@@ -178,19 +173,19 @@ const Dashboard = () => {
                 for (const city in cityLogsMap) {
                     const cityLogs = cityLogsMap[city];
                     const processedLogs = cityLogs.map((log, i) => {
-                        if ((log.total_time ?? 0) > 5000) {
+                        if ((log.total_time ?? 0) > 2000) {
                             const prev = cityLogs[i - 1];
                             const next = cityLogs[i + 1];
                             if (
-                                (prev?.total_time ?? 0) < 5000 &&
-                                (next?.total_time ?? 0) < 5000
+                                (prev?.total_time ?? 0) < 2000 &&
+                                (next?.total_time ?? 0) < 2000
                             ) {
                             }
                         }
                         return log;
                     });
                     filteredLogs[city] = processedLogs.filter(
-                        (log) => (log.total_time ?? 0) < 5000
+                        (log) => (log.total_time ?? 0) < 2000
                     );
                 }
                 return filteredLogs;
@@ -198,7 +193,6 @@ const Dashboard = () => {
 
             if (hideUnreliable) {
                 if (domain) {
-                    // Детальная страница: фильтруем CountryLogs
                     const filteredCountryLogs: CountryLogs = {};
                     for (const country in logsData) {
                         filteredCountryLogs[country] = processCityLogs(
@@ -207,7 +201,6 @@ const Dashboard = () => {
                     }
                     setHttpLogs(filteredCountryLogs);
                 } else {
-                    // Главная страница: фильтруем DomainLogs
                     const filteredDomainLogs: { [domain: string]: CityLogs } = {};
                     for (const domainKey in domainLogsData) {
                         filteredDomainLogs[domainKey] = processCityLogs(
