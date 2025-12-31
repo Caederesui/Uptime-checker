@@ -23,13 +23,21 @@ interface DomainStatusProps {
 }
 
 const getStatusColor = (log: GroupedLog) => {
+    const totalCountries = log.results.length;
+    const quotaExceededCount = log.results.filter(
+        (r) => Number(r.status_code) === 429
+    ).length;
+
+    if (quotaExceededCount > 0) {
+        return styles.grey;
+    }
+
     const problematicCountriesCount = log.results.filter(
         (r) =>
             (r.status_code !== 200 && r.status_code !== 429) ||
             r.total_time === null ||
             (r.total_time && r.total_time > 2500)
     ).length;
-    const totalCountries = log.results.length;
 
     if (problematicCountriesCount === totalCountries) {
         return styles.red;
@@ -109,17 +117,17 @@ const DomainStatus: React.FC<DomainStatusProps> = ({ domain, logs }) => {
                                                             marginRight: "5px",
                                                         }}
                                                     />{" "}
-                                                    {cityTranslations[
-                                                        r.city || "Unknown"
-                                                    ] || r.city}
+                                                    {cityTranslations[r.city] ||
+                                                        r.city ||
+                                                        "Неизвестный город"}
                                                     :{" "}
                                                     {r.status_code !== null
                                                         ? `Статус: ${r.status_code}`
-                                                        : "Статус: N/A"}
+                                                        : "Неизвестный статус"}
                                                     , Время:{" "}
                                                     {r.total_time !== null
                                                         ? `${r.total_time}ms`
-                                                        : "N/A"}
+                                                        : ""}
                                                 </div>
                                             ))}
                                     </div>
