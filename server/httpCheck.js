@@ -48,20 +48,18 @@ export const locationGroups = {
 export const cleanupOldLogs = async () => {
     console.log(`--- Starting log cleanup at ${new Date().toISOString()} (Older than 40 days) ---`);
     try {
-        const fortyDaysAgo = "40 day";
-
         const detailedQuery = `
             DELETE FROM http_logs
-            WHERE created_at < NOW() - INTERVAL $1;
+            WHERE created_at < NOW() - INTERVAL '40 day';
         `;
-        const detailedResult = await pool.query(detailedQuery, [fortyDaysAgo]);
+        const detailedResult = await pool.query(detailedQuery);
         console.log(`Detailed logs cleanup completed. Deleted ${detailedResult.rowCount} rows from http_logs.`);
 
         const hourlyQuery = `
             DELETE FROM http_hourly_logs
-            WHERE created_at < NOW() - INTERVAL $1;
+            WHERE created_at < NOW() - INTERVAL '40 day';
         `;
-        const hourlyResult = await pool.query(hourlyQuery, [fortyDaysAgo]);
+        const hourlyResult = await pool.query(hourlyQuery);
         console.log(`Hourly logs cleanup completed. Deleted ${hourlyResult.rowCount} rows from http_hourly_logs.`);
     } catch (err) {
         console.error('Error during log cleanup:', err);
