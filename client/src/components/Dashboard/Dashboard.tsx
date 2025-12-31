@@ -59,9 +59,9 @@ const Dashboard = () => {
     const [hideUnreliable, setHideUnreliable] = useState(false);
 
     const timeRangeOptions = [
-  { value: "3hour", label: "3 часа" },
-  { value: "day", label: "День" },
-  { value: "week", label: "Неделя" },
+		{ value: "3hour", label: "3 часа" },
+		{ value: "day", label: "День" },
+		{ value: "week", label: "Неделя" },
         { value: "month", label: "Месяц" },
     ];
 
