@@ -7,6 +7,7 @@ import {
     httpCheckAndSave,
     locationGroups,
     aggregateHourlyData,
+    cleanupOldLogs,
 } from "./httpCheck.js";
 
 const app = express();
@@ -25,14 +26,17 @@ app.listen(port, async () => {
         );
     };
 
-    // Initial runs
     runChecks(locationGroups["2min"]);
     aggregateHourlyData().catch((err) =>
         console.error("Initial aggregation failed:", err)
+    );
+    cleanupOldLogs().catch((err) =>
+        console.error("Initial cleanup failed:", err)
     );
 
     // Scheduled runs
     setInterval(() => runChecks(locationGroups["2min"]), 3 * 60 * 1000);
     setInterval(() => runChecks(locationGroups["6min"]), 6 * 60 * 1000);
     setInterval(aggregateHourlyData, 60 * 60 * 1000); // Run hourly aggregation every hour (60 * 60 * 1000 ms)
+    setInterval(cleanupOldLogs, 60 * 60 * 1000); // Run hourly cleanup every hour
 });
