@@ -56,7 +56,12 @@ const Dashboard = () => {
         () => localStorage.getItem("timeRange") || "3hour"
     );
     const { domain } = useParams<{ domain: string }>();
-    const [hideUnreliable, setHideUnreliable] = useState(false);
+    const [hideUnreliable, setHideUnreliable] = useState(
+        () => localStorage.getItem("hideUnreliable") === "true"
+    );
+    const [autoRefresh, setAutoRefresh] = useState(
+        () => localStorage.getItem("autoRefresh") === "true"
+    );
 
     const timeRangeOptions = [
 		{ value: "3hour", label: "3 часа" },
@@ -167,39 +172,60 @@ const Dashboard = () => {
                     const logsForDomain = rawGroupedByDomain[domainKey];
                     domainLogsData[domainKey] = trimCityLogsByTimeRange(logsForDomain);
                 }
-                setDomainLogs(domainLogsData);
             }
+            const processCityLogs = (cityLogsMap: CityLogs): CityLogs => {
+                const filteredLogs: CityLogs = {};
+                for (const city in cityLogsMap) {
+                    const cityLogs = cityLogsMap[city];
+                    const processedLogs = cityLogs.map((log, i) => {
+                        if ((log.total_time ?? 0) > 5000) {
+                            const prev = cityLogs[i - 1];
+                            const next = cityLogs[i + 1];
+                            if (
+                                (prev?.total_time ?? 0) < 5000 &&
+                                (next?.total_time ?? 0) < 5000
+                            ) {
+                                return {
+                                    ...prev,
+                                    unreliable: true,
+                                };
+                            }
+                        }
+                        return log;
+                    });
+                    filteredLogs[city] = processedLogs.filter(
+                        (log) => (log.total_time ?? 0) < 5000
+                    );
+                }
+                return filteredLogs;
+            };
 
             if (hideUnreliable) {
-                const filteredLogs: CountryLogs = {};
-                for (const country in logsData) {
-                    filteredLogs[country] = {};
-                    for (const city in logsData[country]) {
-                        const cityLogs = logsData[country][city];
-                        const processedLogs = cityLogs.map((log, i) => {
-                            if ((log.total_time ?? 0) > 5000) {
-                                const prev = cityLogs[i - 1];
-                                const next = cityLogs[i + 1];
-                                if (
-                                    (prev?.total_time ?? 0) < 5000 &&
-                                    (next?.total_time ?? 0) < 5000
-                                ) {
-                                    return {
-                                        ...prev,
-                                        unreliable: true,
-                                    };
-                                }
-                            }
-                            return log;
-                        });
-                        filteredLogs[country][city] = processedLogs.filter(
-                            (log) => (log.total_time ?? 0) < 5000
+                if (domain) {
+                    // Детальная страница: фильтруем CountryLogs
+                    const filteredCountryLogs: CountryLogs = {};
+                    for (const country in logsData) {
+                        filteredCountryLogs[country] = processCityLogs(
+                            logsData[country]
                         );
                     }
+                    setHttpLogs(filteredCountryLogs);
+                } else {
+                    // Главная страница: фильтруем DomainLogs
+                    const filteredDomainLogs: { [domain: string]: CityLogs } = {};
+                    for (const domainKey in domainLogsData) {
+                        filteredDomainLogs[domainKey] = processCityLogs(
+                            domainLogsData[domainKey]
+                        );
+                    }
+                    setDomainLogs(filteredDomainLogs);
                 }
-                setHttpLogs(filteredLogs);
             } else {
-                setHttpLogs(logsData);
+                if (domain) {
+                    setHttpLogs(logsData);
+                } else {
+                    setDomainLogs(domainLogsData);
+                }
             }
             setStatus("dashboard", "success");
         } catch (e: any) {
@@ -228,8 +254,20 @@ const Dashboard = () => {
     }, [timeRange, hideUnreliable]);
 
     useEffect(() => {
-        const intervalId = setInterval(fetchData, 30000);
+        localStorage.setItem("autoRefresh", autoRefresh.toString());
+    }, [autoRefresh]);
 
+    useEffect(() => {
+        localStorage.setItem("hideUnreliable", hideUnreliable.toString());
+    }, [hideUnreliable]);
+
+    useEffect(() => {
+        let intervalId: number | undefined;
+
+        if (autoRefresh) {
+            intervalId = window.setInterval(fetchData, 30000);
+        }
+        
         const handleVisibilityChange = () => {
             if (document.visibilityState === "visible") {
                 fetchData();
@@ -239,13 +277,15 @@ const Dashboard = () => {
         document.addEventListener("visibilitychange", handleVisibilityChange);
 
         return () => {
-            clearInterval(intervalId);
+            if (intervalId) {
+                window.clearInterval(intervalId);
+            }
             document.removeEventListener(
                 "visibilitychange",
                 handleVisibilityChange
             );
         };
-    }, [domain, timeRange]);
+    }, [domain, timeRange, autoRefresh]);
 
     useEffect(() => {
         localStorage.setItem("timeRange", timeRange);
@@ -260,6 +300,11 @@ const Dashboard = () => {
                             options={timeRangeOptions}
                             value={timeRange}
                             onChange={setTimeRange}
+                        />
+                         <ToggleSwitch
+                            label="Автообновление"
+                            checked={autoRefresh}
+                            onChange={setAutoRefresh}
                         />
                          <ToggleSwitch
                             label="Скрывать недостоверные данные"
@@ -311,6 +356,11 @@ const Dashboard = () => {
                         options={timeRangeOptions}
                         value={timeRange}
                         onChange={setTimeRange}
+                    />
+                    <ToggleSwitch
+                        label="Автообновление"
+                        checked={autoRefresh}
+                        onChange={setAutoRefresh}
                     />
                     <ToggleSwitch
                         label="Скрывать недостоверные данные"
