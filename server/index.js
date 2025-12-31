@@ -29,6 +29,5 @@ app.listen(port, async () => {
 
     // Scheduled runs
     setInterval(() => runChecks(locationGroups["2min"]), 3 * 60 * 1000);
-    setInterval(() => runChecks(locationGroups["5min"]), 6 * 60 * 1000);
-    setInterval(() => runChecks(locationGroups["6min"]), 7 * 60 * 1000);
+    setInterval(() => runChecks(locationGroups["6min"]), 6 * 60 * 1000);
 });

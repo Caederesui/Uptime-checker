@@ -12,20 +12,18 @@ export const locationGroups = {
     "2min": [
         { country: "RU", city: "Moscow" },
         { country: "RU", city: "Saint Petersburg" },
+        { country: "RU", city: "Yekaterinburg" },
         { country: "UA", city: "Kyiv" },
         { country: "UA", city: "Lviv" },
         { country: "KZ", city: "Almaty" },
-
         { country: "BY", city: "Minsk" },
     ],
-    "5min": [
-        { country: "DE", city: "Berlin" },
-        { country: "DE", city: "Dusseldorf" },
-        { country: "KG", city: "Bishkek" },
-        { country: "PL", city: "Warsaw" },
-        { country: "PL", city: "Krakow" },
-    ],
     "6min": [
+        { country: "DE", city: "Berlin" },
+        { country: "DE", city: "Dusseldorf" }, 
+        { country: "KG", city: "Bishkek" },
+        { country: "PL", city: "Warsaw" }, 
+        { country: "PL", city: "Krakow" }, 
         { country: "LV", city: "Riga" },
         { country: "LT", city: "Vilnius" },
         { country: "LT", city: "Siauliai" },

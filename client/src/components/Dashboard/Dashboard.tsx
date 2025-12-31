@@ -191,7 +191,7 @@ const Dashboard = () => {
 
         const handleVisibilityChange = () => {
             if (document.visibilityState === "visible") {
-                fetchData(); // Принудительно обновляем данные при возвращении на вкладку
+                fetchData();
             }
         };
 
@@ -316,10 +316,7 @@ const Dashboard = () => {
                     {Array.from({ length: 4 }).map((_, index) => (
                         <CountryChartPlug key={index} />
                     ))}
-                    {Array.from({ length: 3 }).map((_, index) => (
-                        <CountryChartPlug key={index} />
-                    ))}
-                    {Array.from({ length: 10 }).map((_, index) => (
+                    {Array.from({ length: 13 }).map((_, index) => (
                         <CountryChartPlug key={index} />
                     ))}
                 </div>
