@@ -30,6 +30,7 @@ export const cityTranslations: { [key: string]: string } = {
     "Saint Petersburg": "Санкт-Петербург",
     Kyiv: "Киев",
     Lviv: "Львов",
+    Odesa: "Одесса",
     Almaty: "Алматы",
     Minsk: "Минск",
     Berlin: "Берлин",
@@ -53,4 +54,6 @@ export const cityTranslations: { [key: string]: string } = {
     Tbilisi: "Тбилиси",
     Yerevan: "Ереван",
     Yekaterinburg: "Екатеринбург",
+    Karagandy: "Караганда",
+    Aktau: "Актау",
 };

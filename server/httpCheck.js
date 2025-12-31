@@ -15,7 +15,10 @@ export const locationGroups = {
         { country: "RU", city: "Yekaterinburg" },
         { country: "UA", city: "Kyiv" },
         { country: "UA", city: "Lviv" },
+        { country: "UA", city: "Odesa" },
         { country: "KZ", city: "Almaty" },
+        { country: "KZ", city: "Karagandy" },
+        { country: "KZ", city: "Aktau" },
         { country: "BY", city: "Minsk" },
     ],
     "6min": [
