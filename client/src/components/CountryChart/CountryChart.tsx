@@ -158,11 +158,11 @@ const CountryChart = ({
             pointBackgroundColor: color,
             pointRadius: (context: any) => {
                 const log = context.raw;
-                return log.unreliable ? 5 : 0;
+                return log && log.unreliable ? 5 : 0;
             },
             pointBorderColor: (context: any) => {
                 const log = context.raw;
-                return log.unreliable ? "red" : color;
+                return log && log.unreliable ? "red" : color;
             },
             pointHoverRadius: 7,
             pointHitRadius: 20,
