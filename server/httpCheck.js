@@ -58,12 +58,12 @@ export const aggregateHourlyData = async () => {
                 country,
                 city,
                 MODE() WITHIN GROUP (ORDER BY status_code) AS status_code,
-                AVG(total_time) AS total_time,
-                AVG(download_time) AS download_time,
-                AVG(first_byte_time) AS first_byte_time,
-                AVG(dns_time) AS dns_time,
-                AVG(tls_time) AS tls_time,
-                AVG(tcp_time) AS tcp_time,
+                ROUND(AVG(total_time)::numeric, 2) AS total_time,
+                ROUND(AVG(download_time)::numeric, 2) AS download_time,
+                ROUND(AVG(first_byte_time)::numeric, 2) AS first_byte_time,
+                ROUND(AVG(dns_time)::numeric, 2) AS dns_time,
+                ROUND(AVG(tls_time)::numeric, 2) AS tls_time,
+                ROUND(AVG(tcp_time)::numeric, 2) AS tcp_time,
                 date_trunc('hour', NOW()) AS created_at
             FROM http_logs
             WHERE created_at >= NOW() - INTERVAL '1 hour'
