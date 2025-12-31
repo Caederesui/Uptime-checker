@@ -133,13 +133,16 @@ const CountryChart = ({
     }, []);
 
     const datasets = cities.map((city) => {
-        const logs = cityLogs[city] || [];
+        const rawLogs = cityLogs[city] || [];
         const color = cityColors[city] || "#c9cbcf";
 
-        // Данные приходят с сервера уже агрегированными или детальными
+        const logs = [...rawLogs].sort(
+            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+
         const data = logs.map((log: Log) => ({
             x: new Date(log.created_at).getTime(),
-            y: log.total_time || null,
+            y: log.total_time ?? null,
             packet_loss: log.packet_loss,
             status_code: log.status_code,
             dns_time: log.dns_time,
