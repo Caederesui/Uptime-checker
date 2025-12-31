@@ -209,9 +209,9 @@ const CountryChart = ({
                 },
                 maxTicksLimit: 6,
             },
-            hour: {
+            "3hour": {
                 unit: "minute",
-                stepSize: 10,
+                stepSize: 30,
                 displayFormats: {
                     minute: "HH:mm",
                 },
@@ -219,7 +219,7 @@ const CountryChart = ({
             },
         };
 
-        const currentTimeSettings = timeSettings[timeRange] || timeSettings["3hour"];
+        const currentTimeSettings = timeSettings[timeRange] || timeSettings.day;
 
         return {
             responsive: true,
