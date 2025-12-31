@@ -209,9 +209,9 @@ const CountryChart = ({
                 },
                 maxTicksLimit: 6,
             },
-            "3hour": {
+            hour: {
                 unit: "minute",
-                stepSize: 30,
+                stepSize: 10,
                 displayFormats: {
                     minute: "HH:mm",
                 },
