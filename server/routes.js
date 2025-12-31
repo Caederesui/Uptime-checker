@@ -8,32 +8,42 @@ router.get("/http-logs", async (req, res) => {
     try {
         const { timeRange, domain } = req.query;
         let interval;
+        let tableName;
+
         switch (timeRange) {
+            case "month":
+                interval = "30 day";
+                tableName = "http_hourly_logs";
+                break;
             case "week":
                 interval = "7 day";
+                tableName = "http_hourly_logs";
                 break;
             case "day":
                 interval = "1 day";
+                tableName = "http_logs";
                 break;
             case "3hour":
                 interval = "3 hour";
-                break;
-            case "30minutes":
-                interval = "30 minute";
+                tableName = "http_logs";
                 break;
             default:
-                interval = "1 hour";
+                // Default to 3 hours, detailed logs
+                interval = "3 hour";
+                tableName = "http_logs";
         }
 
         let query;
         let params;
 
+        // Columns required for the response
+        const columns = `country, city, status_code, created_at, total_time, download_time, first_byte_time, dns_time, tls_time, tcp_time`;
+
         if (domain) {
             query = `
         SELECT
-          country, city, status_code, created_at, total_time,
-          download_time, first_byte_time, dns_time, tls_time, tcp_time
-        FROM http_logs
+          ${columns}
+        FROM ${tableName}
         WHERE created_at >= NOW() - $1::interval AND city IS NOT NULL AND domain = $2
         ORDER BY created_at ASC;
       `;
@@ -41,9 +51,8 @@ router.get("/http-logs", async (req, res) => {
         } else {
             query = `
         SELECT
-          domain, country, city, status_code, created_at, total_time,
-          download_time, first_byte_time, dns_time, tls_time, tcp_time
-        FROM http_logs
+          domain, ${columns}
+        FROM ${tableName}
         WHERE created_at >= NOW() - $1::interval AND city IS NOT NULL
         ORDER BY created_at ASC;
       `;

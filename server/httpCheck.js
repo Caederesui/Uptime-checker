@@ -45,6 +45,38 @@ export const locationGroups = {
     ],
 };
 
+export const aggregateHourlyData = async () => {
+    console.log(`--- Starting hourly aggregation at ${new Date().toISOString()} ---`);
+    try {
+        const query = `
+            INSERT INTO http_hourly_logs (
+                domain, country, city, status_code, total_time, download_time,
+                first_byte_time, dns_time, tls_time, tcp_time, created_at
+            )
+            SELECT
+                domain,
+                country,
+                city,
+                MODE() WITHIN GROUP (ORDER BY status_code) AS status_code,
+                AVG(total_time) AS total_time,
+                AVG(download_time) AS download_time,
+                AVG(first_byte_time) AS first_byte_time,
+                AVG(dns_time) AS dns_time,
+                AVG(tls_time) AS tls_time,
+                AVG(tcp_time) AS tcp_time,
+                date_trunc('hour', NOW()) AS created_at
+            FROM http_logs
+            WHERE created_at >= NOW() - INTERVAL '1 hour'
+            GROUP BY domain, country, city;
+        `;
+
+        await pool.query(query);
+        console.log('Hourly aggregation completed successfully.');
+    } catch (err) {
+        console.error('Error during hourly aggregation:', err);
+    }
+};
+
 export const httpCheckAndSave = async (locations) => {
     console.log(
         `--- Starting HTTP check cycle at ${new Date().toISOString()} for ${

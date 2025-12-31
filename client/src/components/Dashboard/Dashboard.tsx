@@ -55,21 +55,14 @@ const Dashboard = () => {
     const [timeRange, setTimeRange] = useState(
         () => localStorage.getItem("timeRange") || "3hour"
     );
-    const [aggregationType, setAggregationType] = useState(
-        () => localStorage.getItem("aggregationType") || "standard"
-    );
     const { domain } = useParams<{ domain: string }>();
     const [hideUnreliable, setHideUnreliable] = useState(false);
 
     const timeRangeOptions = [
-		{ value: "3hour", label: "3 часа" },
-		{ value: "day", label: "День" },
-		{ value: "week", label: "Неделя" },
-    ];
-
-    const aggregationTypeOptions = [
-        { value: "standard", label: "По стандарту" },
-        { value: "hour", label: "По часам" },
+  { value: "3hour", label: "3 часа" },
+  { value: "day", label: "День" },
+  { value: "week", label: "Неделя" },
+        { value: "month", label: "Месяц" },
     ];
 
     const fetchData = async () => {
@@ -205,19 +198,10 @@ const Dashboard = () => {
             );
         };
     }, [domain, timeRange]);
-    
-    useEffect(() => {
-        if (timeRange === "week") {
-            setAggregationType("hour");
-        } else {
-            setAggregationType("standard");
-        }
-    }, [timeRange]);
 
     useEffect(() => {
         localStorage.setItem("timeRange", timeRange);
-        localStorage.setItem("aggregationType", aggregationType);
-    }, [timeRange, aggregationType]);
+    }, [timeRange]);
 
     if (!domain) {
         return (
@@ -228,11 +212,6 @@ const Dashboard = () => {
                             options={timeRangeOptions}
                             value={timeRange}
                             onChange={setTimeRange}
-                        />
-                        <ButtonGroup
-                            options={aggregationTypeOptions}
-                            value={aggregationType}
-                            onChange={setAggregationType}
                         />
                          <ToggleSwitch
                             label="Скрывать недостоверные данные"
@@ -248,18 +227,6 @@ const Dashboard = () => {
                               (_, index) => <CountryChartPlug key={index} />
                           )
                         : Object.entries(domainLogs)
-                              .sort(([domainA], [domainB]) => {
-                                  const domainOrder = [
-                                      "site.yummyani.me",
-                                      "site.yummy-ani.me",
-                                      "ru.yummyani.me",
-                                      "en.yummyani.me",
-                                  ];
-                                  return (
-                                      domainOrder.indexOf(domainA) -
-                                      domainOrder.indexOf(domainB)
-                                  );
-                              })
                               .map(([domain, cityLogs]) => (
                                   <div
                                       key={domain}
@@ -278,7 +245,6 @@ const Dashboard = () => {
                                               cityLogs={cityLogs}
                                               cities={Object.keys(cityLogs)}
                                               timeRange={timeRange}
-                                              aggregationType={aggregationType}
                                               isChartLoading={isChartLoading}
                                           />
                                       </div>
@@ -297,11 +263,6 @@ const Dashboard = () => {
                         options={timeRangeOptions}
                         value={timeRange}
                         onChange={setTimeRange}
-                    />
-                    <ButtonGroup
-                        options={aggregationTypeOptions}
-                        value={aggregationType}
-                        onChange={setAggregationType}
                     />
                     <ToggleSwitch
                         label="Скрывать недостоверные данные"
@@ -443,9 +404,6 @@ const Dashboard = () => {
                                                         }
                                                         cities={cities}
                                                         timeRange={timeRange}
-                                                        aggregationType={
-                                                            aggregationType
-                                                        }
                                                         isChartLoading={
                                                             isChartLoading
                                                         }
