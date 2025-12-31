@@ -65,9 +65,44 @@ const Dashboard = () => {
         { value: "month", label: "Месяц" },
     ];
 
+    // Обрезает логи, чтобы все города/страны начинались и заканчивались одновременно.
+    const trimCityLogsByTimeRange = (cityLogsMap: CityLogs) => {
+        let minTime = Infinity;
+        let maxTime = -Infinity;
+
+        // 1. Найти общий минимальный и максимальный CreatedAt среди всех городов
+        for (const city in cityLogsMap) {
+            const logs = cityLogsMap[city];
+            if (logs.length > 0) {
+                const firstTime = new Date(logs[0].created_at).getTime();
+                const lastTime = new Date(logs[logs.length - 1].created_at).getTime();
+
+                minTime = Math.min(minTime, firstTime);
+                maxTime = Math.max(maxTime, lastTime);
+            }
+        }
+
+        if (minTime === Infinity || maxTime === -Infinity) {
+            return cityLogsMap;
+        }
+
+        // 2. Обрезать все логи по общему диапазону
+        const trimmedLogs: CityLogs = {};
+        for (const city in cityLogsMap) {
+            trimmedLogs[city] = cityLogsMap[city].filter((log) => {
+                const logTime = new Date(log.created_at).getTime();
+                return logTime >= minTime && logTime <= maxTime;
+            });
+        }
+
+        return trimmedLogs;
+    };
+
     const fetchData = async () => {
         try {
             let logsData: CountryLogs = {};
+            let domainLogsData: { [domain: string]: CityLogs } = {};
+
             if (domain) {
                 const [logsResponse, locationsResponse] = await Promise.all([
                     fetch(`/http-logs?timeRange=${timeRange}&domain=${domain}`),
@@ -86,6 +121,13 @@ const Dashboard = () => {
                 }
 
                 logsData = await logsResponse.json();
+                // Обрезка для детальной страницы (нужно обрезать все города внутри каждой страны)
+                const processedLogsData: CountryLogs = {};
+                for (const countryKey in logsData) {
+                    processedLogsData[countryKey] = trimCityLogsByTimeRange(logsData[countryKey]);
+                }
+                logsData = processedLogsData;
+                
                 const locationsData: LocationGroups =
                     await locationsResponse.json();
                 setLocationGroups(locationsData);
@@ -102,7 +144,7 @@ const Dashboard = () => {
                         log.country && allowedCountries.includes(log.country)
                 );
 
-                const groupedByDomain = filteredData.reduce(
+                const rawGroupedByDomain = filteredData.reduce(
                     (acc, log) => {
                         if (log.domain && log.city) {
                             const domain = log.domain;
@@ -119,7 +161,13 @@ const Dashboard = () => {
                     },
                     {} as { [domain: string]: CityLogs }
                 );
-                setDomainLogs(groupedByDomain);
+
+                // Применяем обрезку к каждому домену
+                for (const domainKey in rawGroupedByDomain) {
+                    const logsForDomain = rawGroupedByDomain[domainKey];
+                    domainLogsData[domainKey] = trimCityLogsByTimeRange(logsForDomain);
+                }
+                setDomainLogs(domainLogsData);
             }
 
             if (hideUnreliable) {
