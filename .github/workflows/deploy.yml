@@ -68,6 +68,10 @@ jobs:
                       sudo systemctl stop nginx || true
                       sudo systemctl disable nginx || true
                       # Pull the latest image from Docker Hub
+                      # Prune unused Docker components (images, containers, networks) to free disk space
+                      sudo docker system prune -a -f || true
+                      
+                      # Pull the latest image from Docker Hub
                       docker compose pull
                       # Run the new container from the pulled image
                       docker compose up -d
