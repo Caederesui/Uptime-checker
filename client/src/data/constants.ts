@@ -57,3 +57,17 @@ export const cityTranslations: { [key: string]: string } = {
     Karagandy: "Караганда",
     Aktau: "Актау",
 };
+
+export const CHART_COLORS = [
+    "#ff6666",
+    "#36a2eb",
+    "#ffce56",
+    "#4bc0c0",
+    "#9966ff",
+    "#ff9f40",
+    "#E7E9ED",
+    "#A8D08D", 
+    "#C08497", 
+    "#9D7CA0", 
+    "#7EC0EE", 
+]

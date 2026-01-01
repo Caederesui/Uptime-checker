@@ -16,7 +16,7 @@ import {
 import "chartjs-adapter-date-fns";
 import { ru } from "date-fns/locale";
 import CrosshairPlugin from "chartjs-plugin-crosshair";
-import { cityTranslations } from "../../data/constants.ts";
+import { cityTranslations, CHART_COLORS } from "../../data/constants.ts";
 
 ChartJS.register(
     LinearScale,
@@ -54,36 +54,6 @@ interface CountryChartProps {
     timeRange: string;
     isChartLoading: boolean;
 }
-
-const cityColors: { [key: string]: string } = {
-    Moscow: "#FF6384",
-    "Saint Petersburg": "#36A2EB",
-    Kyiv: "#FFCE56",
-    Lviv: "#4BC0C0",
-    Almaty: "#9966FF",
-    Astana: "#FF9F40",
-    Minsk: "#E7E9ED",
-    Berlin: "#ffcd56",
-    Dusseldorf: "#ff9f40",
-    Bishkek: "#4bc0c0",
-    Warsaw: "#9966ff",
-    Krakow: "#c9cbcf",
-    Riga: "#ff6384",
-    Vilnius: "#ffcd56",
-    Siauliai: "#ff9f40",
-    Tallinn: "#4bc0c0",
-    "New York": "#9966ff",
-    "Los Angeles": "#c9cbcf",
-    Amsterdam: "#ff6384",
-    Utrecht: "#ffcd56",
-    London: "#ff9f40",
-    Woking: "#4bc0c0",
-    Chisinau: "#9966ff",
-    Prague: "#c9cbcf",
-    Brno: "#ff6384",
-    Tbilisi: "#ffcd56",
-    Yerevan: "#ff9f40",
-};
 
 const CountryChart = ({
     cityLogs,
@@ -132,9 +102,10 @@ const CountryChart = ({
         };
     }, []);
 
-    const datasets = cities.map((city) => {
+    const datasets = cities.map((city, index) => {
         const logs = cityLogs[city] || [];
-        const color = cityColors[city] || "#c9cbcf";
+        const colorIndex = index % CHART_COLORS.length;
+        const color = CHART_COLORS[colorIndex] || "#c9cbcf";
         const groupedLogs = logs.reduce(
             (acc: { [key: number]: Log[] }, log: Log) => {
                 const date = new Date(log.created_at);
