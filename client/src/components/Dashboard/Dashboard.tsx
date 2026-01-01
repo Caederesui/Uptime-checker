@@ -253,17 +253,16 @@ const Dashboard = () => {
     useEffect(() => {
         let intervalId: number | undefined;
 
-        if (autoRefresh) {
-            intervalId = window.setInterval(fetchData, 30000);
-        }
-        
         const handleVisibilityChange = () => {
             if (document.visibilityState === "visible") {
                 fetchData();
             }
         };
 
-        document.addEventListener("visibilitychange", handleVisibilityChange);
+        if (autoRefresh) {
+            intervalId = window.setInterval(fetchData, 30000);
+            document.addEventListener("visibilitychange", handleVisibilityChange);
+        }
 
         return () => {
             if (intervalId) {
@@ -274,7 +273,7 @@ const Dashboard = () => {
                 handleVisibilityChange
             );
         };
-    }, [domain, timeRange, autoRefresh]);
+    }, [domain, timeRange, autoRefresh, hideUnreliable]);
 
     useEffect(() => {
         localStorage.setItem("timeRange", timeRange);
@@ -302,7 +301,7 @@ const Dashboard = () => {
                         />
                     </div>
                 </div>
-                <Status timeRange={timeRange} />
+                <Status timeRange={timeRange} autoRefresh={autoRefresh} />
                 <div className={styles.chartsGrid}>
                     {loading
                         ? Array.from({ length: domains.length }).map(
@@ -358,7 +357,7 @@ const Dashboard = () => {
                     />
                 </div>
             </div>
-            <Status timeRange={timeRange} domain={domain} />
+            <Status timeRange={timeRange} domain={domain} autoRefresh={autoRefresh} />
             {loading ? (
                 <div className={styles.chartsGrid}>
                     {Array.from({ length: 4 }).map((_, index) => (

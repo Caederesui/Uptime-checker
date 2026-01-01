@@ -32,9 +32,10 @@ interface DomainLogs {
 interface StatusProps {
     timeRange: string;
     domain?: string;
+    autoRefresh: boolean;
 }
 
-const Status: React.FC<StatusProps> = ({ timeRange, domain }) => {
+const Status: React.FC<StatusProps> = ({ timeRange, domain, autoRefresh }) => {
     const [domainLogs, setDomainLogs] = useState<DomainLogs>({});
     const [loading, setLoading] = useState(true);
     const { setStatus } = useDataStatus();
@@ -148,9 +149,18 @@ const Status: React.FC<StatusProps> = ({ timeRange, domain }) => {
         setLoading(true);
         setStatus("status", "loading");
         fetchData();
-        const intervalId = setInterval(fetchData, 30000);
-        return () => clearInterval(intervalId);
-    }, [domain, timeRange]);
+        let intervalId: number | undefined;
+
+        if (autoRefresh) {
+            intervalId = window.setInterval(fetchData, 30000);
+        }
+
+        return () => {
+            if (intervalId) {
+                window.clearInterval(intervalId);
+            }
+        };
+    }, [domain, timeRange, autoRefresh]);
 
     if (loading) return <StatusPlug domain={domain} />;
 
