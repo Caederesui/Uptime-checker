@@ -12,7 +12,7 @@ export const locationGroups = {
     "2min": [
         { country: "RU", city: "Moscow" },
         { country: "RU", city: "Saint Petersburg" },
-        { country: "RU", city: "Yekaterinburg" },
+        { country: "RU", city: "Novosibirsk" },
         { country: "UA", city: "Kyiv" },
         { country: "UA", city: "Lviv" },
         { country: "UA", city: "Odesa" },

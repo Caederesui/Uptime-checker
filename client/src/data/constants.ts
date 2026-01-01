@@ -53,7 +53,7 @@ export const cityTranslations: { [key: string]: string } = {
     Brno: "Брно",
     Tbilisi: "Тбилиси",
     Yerevan: "Ереван",
-    Yekaterinburg: "Екатеринбург",
+    Novosibirsk: "Новосибирск",
     Karagandy: "Караганда",
     Aktau: "Актау",
 };
