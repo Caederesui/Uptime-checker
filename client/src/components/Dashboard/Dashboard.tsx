@@ -251,7 +251,6 @@ const Dashboard = () => {
     }, [hideUnreliable]);
 
     useEffect(() => {
-        let intervalId: number | undefined;
 
         const handleVisibilityChange = () => {
             if (document.visibilityState === "visible") {
@@ -260,14 +259,10 @@ const Dashboard = () => {
         };
 
         if (autoRefresh) {
-            intervalId = window.setInterval(fetchData, 30000);
             document.addEventListener("visibilitychange", handleVisibilityChange);
         }
 
         return () => {
-            if (intervalId) {
-                window.clearInterval(intervalId);
-            }
             document.removeEventListener(
                 "visibilitychange",
                 handleVisibilityChange

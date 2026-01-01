@@ -149,17 +149,6 @@ const Status: React.FC<StatusProps> = ({ timeRange, domain, autoRefresh }) => {
         setLoading(true);
         setStatus("status", "loading");
         fetchData();
-        let intervalId: number | undefined;
-
-        if (autoRefresh) {
-            intervalId = window.setInterval(fetchData, 30000);
-        }
-
-        return () => {
-            if (intervalId) {
-                window.clearInterval(intervalId);
-            }
-        };
     }, [domain, timeRange, autoRefresh]);
 
     if (loading) return <StatusPlug domain={domain} />;
